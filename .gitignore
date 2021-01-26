@@ -1,0 +1,7 @@
+# Visual code studio
+.vscode
+
+# Python
+__pycache__
+app/__pycache__
+app/attributes/__pycache__
