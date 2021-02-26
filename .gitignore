@@ -5,3 +5,6 @@
 __pycache__
 app/__pycache__
 app/attributes/__pycache__
+
+# Tests
+tests/test_data

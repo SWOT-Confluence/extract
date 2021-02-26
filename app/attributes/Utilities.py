@@ -5,15 +5,15 @@ import shapefile as shp
 """extract utilities for working with matrices and data present in the different
 test data files."""
 
-def create_mean_series(df):
-    """Returns a Series of mean values over time for the dataframe parameter."""
+def create_mean_series(df_dict):
+    """Returns a Series of mean values over time for the dataframe dictionary parameter."""
     
     reach_dict = {}
-    reach_dict = { key : value.mean(axis = 0) for key, value in df.items() }
+    reach_dict = { key : value.mean(axis = 0) for key, value in df_dict.items() }
 
     return reach_dict
 
-def create_reach_dict(df, topology):
+def create_reach_dict(df, topology, basin_num):
     """Creates a dictionary of dataframes with a key of reachid."""
 
     # Add topology index (reachid) and link columns
@@ -21,7 +21,7 @@ def create_reach_dict(df, topology):
 
     # Group by reachid, store dataframe in a dictionary organized by reachid
     df = list(df.groupby("reachid"))
-    df_dict = { element[0] : element[1] for element in df }
+    df_dict = { basin_num + '_' + element[0] : element[1] for element in df }
 
     # Remove reachid from dataframe value
     for value in df_dict.values():

@@ -25,7 +25,7 @@ class Topology:
     def _extract_topo_data(self, topo_df):
         """Retrieve data from CSV file found at Path attribute."""
 
-        # RAdd an explicit node index to match other data
+        # Add an explicit node index to match other data
         topo_df = topo_df.rename(columns = {"index" : "topoid", "link" : "reachid"})
         
         # Convert reachid and topoid to str values

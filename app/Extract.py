@@ -1,6 +1,3 @@
-# Standard imports
-from os import scandir
-
 # Local imports
 from app.Input import Input
 from app.Output import Output
@@ -17,15 +14,18 @@ class Extract:
 
     Attributes
     ----------
-        data_directory: Path
-            Path to directory that contains basin files
+        input_dir_list: list
+            list of Path objects to directories that contain basin files
+        logger: Logger
+            Logger object to log messages to a file
         output_directory: Path
             Path to directory that will contain output files
     """
 
-    def __init__(self, data_directory, output_directory):
-        self.data_directory = data_directory
+    def __init__(self, input_dir_list, output_directory, logger):
+        self.input_dir_list = input_dir_list
         self.output_directory = output_directory
+        self.logger = logger
 
     def extract_data(self):
         """Extracts data from input and outputs two NetCDF files per river reach.
@@ -35,10 +35,9 @@ class Extract:
         data.
         """
 
-        with scandir(self.data_directory) as entries:
-            for entry in entries:
+        for entry in self.input_dir_list:
 
-                print("\nBASIN:", entry.name)
+                self.logger.info("Processing basin: " + entry.name)
 
                 # Obtain input files
                 input = Input(entry)
@@ -54,27 +53,27 @@ class Extract:
         """Create a dictionary of node and reach level data from input files."""
 
         # Topology
-        print('Calculating topology...')
+        self.logger.info('Calculating topology...')
         topology = Topology(input.topology_file)
 
         # Discharge reach and node data (Qhat and Qsd)
-        print('Calculating discharge...')
-        discharge = Discharge(input.discharge_file, topology)
+        self.logger.info('Calculating discharge...')
+        discharge = Discharge(input.discharge_file, topology, input.basin_num)
 
         # width reach and node data
-        print('Calculating width...')
-        width = Width(input.width_file, topology)
+        self.logger.info('Calculating width...')
+        width = Width(input.width_file, topology, input.basin_num)
 
         # wse reach and node data
-        print('Calculating wse...')
-        wse = Wse(input.wse_file, topology)
+        self.logger.info('Calculating wse...')
+        wse = Wse(input.wse_file, topology, input.basin_num)
 
         # slope2 reach and node data
-        print('Calculating slope2...')
-        slope = Slope(input.slope_file, topology, wse.wse_node)
+        self.logger.info('Calculating slope2...')
+        slope = Slope(topology, wse.wse_node, input.basin_num)
 
         # d_x_area reach and node data
-        print('Calculating d_x_area...')
+        self.logger.info('Calculating d_x_area...')
         dxarea = Dxarea(width, wse, topology)
 
         return {

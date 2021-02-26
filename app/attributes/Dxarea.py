@@ -1,3 +1,6 @@
+# Standard imports
+import warnings
+
 class Dxarea:
     """Class that represents d_x_area data.
 
@@ -6,7 +9,7 @@ class Dxarea:
         dxarea_node: dictionary
            d_x_area node-level data organized by reach with nx by nt (dataframe) values
         dxarea_reach: dictionary
-           d_x_area reach-level data organized by reach with nx by 1 (series) values
+           d_x_area reach-level data organized by reach with 1 by nt (series) values
         topology: Topology
             Topology object that represents topology data
         width: Width
@@ -27,7 +30,7 @@ class Dxarea:
 
         # Extract wse and width values to calculate d_x_area and store in a dictionary
         dxa_dict = {}
-        for key, value in self.width.width_node.items():     
+        for key, value in self.width.width_node.items():
             wse = self.wse.wse_node[key]
             dxa_dict[key] = _calculate_dxa(wse, value)
         
@@ -47,8 +50,11 @@ def _calculate_dxa(wse, width):
         """Calculate dA data using width and wse attributes."""
 
         # Subtract median wse across time level from all wse values
-        dH = wse.subtract(wse.median(axis = 0))
-        # Get the median width values across time level for all width values
-        dW =  width.subtract(width.median(axis = 0))
-
-        return (dH.divide(2)).multiply(dW)
+        # Ignore RuntimeWarning: Mean of empty slice
+        dH = None
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=RuntimeWarning)
+            dH = wse.subtract(wse.median(axis = 0, skipna = True))
+        
+        # Multiple width by change in wse
+        return width.multiply(dH)
