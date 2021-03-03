@@ -15,6 +15,8 @@ class Discharge:
     ----------
         file: Path
             Path to .discharge file
+        q_node: dictionary
+            discharge node-level data organized by reach with nx by nt (dataframe) values
         qhat_reach: dictionary
             Prior mean discharge for each reach (scalar)
         qsd_reach: dictionary
@@ -30,10 +32,10 @@ class Discharge:
         self.topology = topology
         df = extract_node_data_txt(self.file, "Time;", self.topology)
         df.replace(0.0, np.NaN, inplace = True)
-        discharge_data = create_reach_dict(df, self.topology, basin_num)
+        self.q_node = create_reach_dict(df, self.topology, basin_num)
         
         # Calculate SWORD of Science data: Qhat and Qsds
-        sword_data = _calculate_qhat_qsd(discharge_data)
+        sword_data = _calculate_qhat_qsd(self.q_node)
         self.qhat_reach = sword_data["qhat_reach"]
         self.qsd_reach = sword_data["qsd_reach"]
 
