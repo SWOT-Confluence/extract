@@ -37,7 +37,7 @@ class Extract:
 
         for entry in self.input_dir_list:
 
-                self.logger.info("Processing basin: " + entry.name)
+                self.logger.info(f"Processing basin: {entry.name}")
 
                 # Obtain input files
                 input = Input(entry)
@@ -58,19 +58,19 @@ class Extract:
 
         # Discharge reach and node data (Qhat and Qsd)
         self.logger.info('Calculating discharge...')
-        discharge = Discharge(input.discharge_file, topology, input.basin_num)
+        discharge = Discharge(input.discharge_file, topology, input.basin_num, input.invalid_nodes)
 
         # width reach and node data
         self.logger.info('Calculating width...')
-        width = Width(input.width_file, topology, input.basin_num)
+        width = Width(input.width_file, topology, input.basin_num, input.invalid_nodes)
 
         # wse reach and node data
         self.logger.info('Calculating wse...')
-        wse = Wse(input.wse_file, topology, input.basin_num)
+        wse = Wse(input.wse_file, topology, input.basin_num, input.invalid_nodes)
 
         # slope2 reach and node data
         self.logger.info('Calculating slope2...')
-        slope = Slope(topology, wse.wse_node, input.basin_num)
+        slope = Slope(topology, wse.wse_node, input.basin_num, input.invalid_nodes)
 
         # d_x_area reach and node data
         self.logger.info('Calculating d_x_area...')

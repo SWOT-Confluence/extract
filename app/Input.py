@@ -1,5 +1,5 @@
 # Standard imports
-from pathlib import Path
+import json
 
 class Input:
     """A class that represents input data files to be processed.
@@ -18,6 +18,8 @@ class Input:
             Path to width file
         wse_file: Path
             Path to stage file
+        invalid_nodes: Dictionary
+            Dictionary of invalid nodes organized by basin
     """
 
     def __init__(self, input_directory):
@@ -28,3 +30,5 @@ class Input:
             self.topology_file = self.input_directory / (self.basin_num + "_T.csv")
             self.width_file = self.input_directory / (self.basin_num + "_W.shp")
             self.wse_file = self.input_directory / (self.basin_num + ".stage")
+            with open("app/data/invalid_nodes.json") as invalid_node_file:
+                self.invalid_nodes = json.load(invalid_node_file)
