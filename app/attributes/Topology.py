@@ -26,14 +26,13 @@ class Topology:
         """Retrieve data from CSV file found at Path attribute."""
 
         # Add an explicit node index to match other data
-        topo_df = topo_df.rename(columns = {"index" : "topoid", "link" : "reachid"})
+        topo_df = topo_df.rename(columns = {"index" : "nodeid", "link" : "reachid"})
         
         # Convert reachid and topoid to str values
-        convert_dict = { "reachid" : str, "topoid" : str }
+        convert_dict = { "reachid" : str, "nodeid" : str }
         topo_df = topo_df.astype(convert_dict)
         
         # Set node as index
-        topo_df.insert(0, "node", range(1, (self.num_nodes + 1)))
-        topo_df.set_index("node", inplace = True)
+        topo_df.set_index("nodeid", inplace = True)
         
         return topo_df

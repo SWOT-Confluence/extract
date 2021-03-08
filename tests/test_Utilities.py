@@ -27,7 +27,7 @@ class TestUtilities(unittest.TestCase):
         self.assertEqual("index", data_df.columns[3])
 
         # Assert index name and number of nodes
-        self.assertEqual("node", data_df.index.name)
+        self.assertEqual("nodeid", data_df.index.name)
         self.assertEqual(3520, len(data_df.index))
         
         # Assert shape
@@ -40,7 +40,7 @@ class TestUtilities(unittest.TestCase):
         self.assertEqual(9863, self.DATA_DF.shape[1])    # columns
 
         # Assert index name and number of nodes
-        self.assertEqual("node", self.DATA_DF.index.name)
+        self.assertEqual("nodeid", self.DATA_DF.index.name)
         self.assertEqual(3520, len(self.DATA_DF.index))
 
     def test_create_reach_dict(self):

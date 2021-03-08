@@ -43,9 +43,10 @@ def extract_node_data_txt(file, phrase, topology):
     data.drop(0, inplace = True, axis = 1)
     data = data.transpose()
 
-    # Add an explicit node column
-    data.insert(0, "node", range(1, (topology.num_nodes + 1)))
-    data.set_index("node", inplace = True) 
+    # Add an explicit node identifier index
+    data.insert(0, "nodeid", topology.topo_data.index.to_numpy())
+    data = data.astype({"nodeid": str})
+    data.set_index("nodeid", inplace = True)
 
     return data
 
@@ -60,9 +61,10 @@ def extract_node_data_shp(file, topology):
         records = sf.records()
         data = pd.DataFrame(columns = fields, data = records)
         
-        # Add an explicit node column
-        data.insert(0, "node", range(1, (topology.num_nodes + 1)))
-        data.set_index("node", inplace = True)
+        # Add an explicit node identifier index
+        data.insert(0, "nodeid", topology.topo_data.index.to_numpy())
+        data = data.astype({"nodeid": str})
+        data.set_index("nodeid", inplace = True)
 
     return data
 

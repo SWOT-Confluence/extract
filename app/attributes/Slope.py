@@ -32,13 +32,14 @@ class Slope:
 
     TIME_STEPS = 9862
 
-    def __init__(self, topology, wse_node, basin_num):
+    def __init__(self, topology, wse_node, basin_num, invalid_nodes):
 
         self.topology = topology
         self.wse_node = wse_node
 
-        # Extract coordinate data from shapefile and create reach dataframes
-        coord_df = list(topology.topo_data.groupby("reachid"))
+        # Remove invalid nodes from topology and organize by reachid
+        topo_df = topology.topo_data.drop(invalid_nodes[basin_num])
+        coord_df = list(topo_df.groupby("reachid"))
         self.coord_dict = { basin_num + '_' + element[0] : element[1] for element in coord_df }
 
         # Use coordinate data and wse data to calculate slope (reach and node)
@@ -71,9 +72,9 @@ class Slope:
             # Create a dataframe with repeated values
             node_df = pd.DataFrame(value_tile)
             
-            # Insert node values as an index to the dataframe
-            node_df.insert(0, "node", np.array(self.wse_node[key].index))
-            node_df.set_index("node", inplace = True)
+            # Insert node identifiers as an index to the dataframe
+            node_df.insert(0, "nodeid", self.coord_dict[key].index.to_numpy())
+            node_df.set_index("nodeid", inplace = True)
             
             # Apply a mask of wse NaN values to slope node df
             node_df.mask(self.wse_node[key].isna(), np.nan, inplace=True)
@@ -124,7 +125,7 @@ def _apply_linear_regression(column, node_dist):
 
     # Dependent variable (y) - heights
     height = column.to_numpy()
-
+    
     # Mask out NaNs and return NaN if no height data is present
     mask = ~np.isnan(height)
     height = height[mask]
@@ -132,8 +133,8 @@ def _apply_linear_regression(column, node_dist):
         return np.nan
 
     # Independent variable (x) - node distances
-    distance = node_dist.to_numpy().reshape((-1, 1))
-    distance = distance[mask]
+    node_dist = node_dist.to_numpy()[mask]
+    distance = node_dist.reshape((-1, 1))
     
     # Create and fit Linear Regression model
     model = LinearRegression().fit(distance, height)

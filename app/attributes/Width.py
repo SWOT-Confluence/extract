@@ -24,12 +24,13 @@ class Width:
 
     TIME_STEPS = 9862
 
-    def __init__(self, file, topology, basin_num):
+    def __init__(self, file, topology, basin_num, invalid_nodes):
         self.file = file
         self.topology = topology
         
-        # Create a dictionary of dataframes organized by reach
+        # Drop invalid nodes and organize dataframe by reach
         df = extract_node_data_shp(file, self.topology)
+        df.drop(invalid_nodes[basin_num], inplace=True)
         df_dict = create_reach_dict(df, self.topology, basin_num)
 
         # Create node-level and reach-level dataframes for each reach

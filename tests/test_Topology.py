@@ -13,8 +13,8 @@ class TestTopology(unittest.TestCase):
 
         # Assert value of object's attributes
         self.assertEqual(3520, topo.num_nodes)
-        self.assertEqual(["topoid", "lon", "lat", "reachid", "dslink"], list(topo.topo_data.columns))
-        self.assertEqual("node", topo.topo_data.index.name)
+        self.assertEqual(["lon", "lat", "reachid", "dslink"], list(topo.topo_data.columns))
+        self.assertEqual("nodeid", topo.topo_data.index.name)
 
 if __name__ == '__main__':
     unittest.main()

@@ -1,4 +1,5 @@
 # Standard library imports
+import json
 import unittest
 from unittest import mock
 from unittest.mock import patch
@@ -20,13 +21,17 @@ class TestSlope(unittest.TestCase):
             [30371, 29.35, 56.446, "1", "2"], [30372, 29.34, 56.446, "1", "2"],
             [30373, 29.33, 56.446, "1", "2"]]
     COORD_DATA = pd.DataFrame(COORD_DATA, columns=["index", "lon", "lat", "link", "dslink"])
-    COORD_DATA.insert(0, "node", range(1, 6))
-    COORD_DATA.set_index("node", inplace=True)
+    COORD_DATA = COORD_DATA.rename(columns = {"index" : "nodeid"})
+    COORD_DATA = COORD_DATA.astype({ "nodeid" : str})
+    COORD_DATA.set_index("nodeid", inplace=True)
 
     WSE_DATA = [33.5, 30, 28.75, 25, 24.3, 23.8, 22, 20, 18.6, 17, 15.85, 13.12, 
         10, 8.6, 5.43, 4.40, 4.15, 3.33, 3.05, 2.75, 2.35, 1.95, 1.50, 1.25, 1.05]
     WSE_DATA = pd.DataFrame(np.array(WSE_DATA).reshape((5,5)), dtype=float)
 
+    INVALID_NODES = {
+        "008" : []
+    }
 
     def test_calculate_distance(self):        
         # Retrieve row and start node data
@@ -59,9 +64,8 @@ class TestSlope(unittest.TestCase):
     def test_calculate_reach(self):
         
         # Data needed to create slope object
-        topo_data = self.COORD_DATA.rename(columns = {"index" : "topoid", "link" : "reachid"})
-        convert_dict = { "reachid" : str, "topoid" : str }
-        topo_data = topo_data.astype(convert_dict)
+        topo_data = self.COORD_DATA.rename(columns = {"link" : "reachid"})
+        topo_data = topo_data.astype({ "reachid" : str})
         topo_dict = {}
         topo_dict["008_1"] = topo_data
 
@@ -78,15 +82,15 @@ class TestSlope(unittest.TestCase):
         self.assertAlmostEqual(0.01022, slope_series.loc[3], places=5)
         self.assertAlmostEqual(0.00985, slope_series.loc[4], places=5)
     
-    @mock.patch.dict("app.config.extract_config", {"no_cores": 5, "input_dir": "", 
+    @mock.patch.dict("app.data.config.extract_config", {"no_cores": 5, "input_dir": "", 
         "output_dir": "", "logging_dir": ""})
     @patch('app.attributes.Topology', autospec=True)
     @patch.object(Slope, '_create_node_dict')
     def test_create_reach_dict(self, mock_node, mock_topo):
         
         # Data needed to create slope object
-        topo_data = self.COORD_DATA.rename(columns = {"index" : "topoid", "link" : "reachid"})
-        convert_dict = { "reachid" : str, "topoid" : str }
+        topo_data = self.COORD_DATA.rename(columns = {"link" : "reachid"})
+        convert_dict = { "reachid" : str }
         topo_data = topo_data.astype(convert_dict)
         mock_topo.topo_data = topo_data
 
@@ -94,7 +98,7 @@ class TestSlope(unittest.TestCase):
         wse_node["008_1"] = self.WSE_DATA
 
         # Create slope object; assert reach values
-        slope = Slope(mock_topo, wse_node, "008")
+        slope = Slope(mock_topo, wse_node, "008", self.INVALID_NODES)
         slope_series = slope.slope_reach["008_1"]
         self.assertAlmostEqual(0.01325, slope_series.loc[0], places=5)
         self.assertAlmostEqual(0.01199, slope_series.loc[1], places=5)
@@ -102,7 +106,7 @@ class TestSlope(unittest.TestCase):
         self.assertAlmostEqual(0.01022, slope_series.loc[3], places=5)
         self.assertAlmostEqual(0.00985, slope_series.loc[4], places=5)
 
-    @mock.patch.dict("app.config.extract_config", {"no_cores": 5, "input_dir": "", 
+    @mock.patch.dict("app.data.config.extract_config", {"no_cores": 5, "input_dir": "", 
         "output_dir": "", "logging_dir": ""})
     @patch('app.attributes.Topology', autospec=True)
     @patch.object(Slope, 'TIME_STEPS')
@@ -111,8 +115,8 @@ class TestSlope(unittest.TestCase):
         # Data needed to create slope object
         mock_time = 5
 
-        topo_data = self.COORD_DATA.rename(columns = {"index" : "topoid", "link" : "reachid"})
-        convert_dict = { "reachid" : str, "topoid" : str }
+        topo_data = self.COORD_DATA.rename(columns = {"link" : "reachid"})
+        convert_dict = { "reachid" : str }
         topo_data = topo_data.astype(convert_dict)
         mock_topo.topo_data = topo_data
 
@@ -129,11 +133,11 @@ class TestSlope(unittest.TestCase):
                         [0.01325, 0.01199, 0.01154, 0.01022, 0.00985],
                         ]
         expected_dict["008_1"] = pd.DataFrame(expected_value)
-        expected_dict["008_1"].insert(0, "node", np.array(wse_node["008_1"].index))
-        expected_dict["008_1"].set_index("node", inplace = True)
+        expected_dict["008_1"].insert(0, "nodeid", self.COORD_DATA.index.to_numpy())
+        expected_dict["008_1"].set_index("nodeid", inplace = True)
 
         # Create slope object; assert node values
-        slope = Slope(mock_topo, wse_node, "008")
+        slope = Slope(mock_topo, wse_node, "008", self.INVALID_NODES)
         assert_frame_equal(expected_dict["008_1"], slope.slope_node["008_1"], rtol=0.05)
 
 if __name__ == '__main__':

@@ -3,7 +3,6 @@ import warnings
 
 # Third party imports
 import numpy as np
-import pandas as pd
 
 # Local imports
 from app.attributes.Utilities import create_reach_dict, extract_node_data_txt
@@ -25,17 +24,20 @@ class Discharge:
             Topology object that represents topology data
     """
 
-    def __init__(self, file, topology, basin_num):
+    def __init__(self, file, topology, basin_num, invalid_nodes):
         self.file = file
 
         # Obtain discharge data in a dataframe
         self.topology = topology
-        df = extract_node_data_txt(self.file, "Time;", self.topology)
-        df.replace(0.0, np.NaN, inplace = True)
-        self.q_node = create_reach_dict(df, self.topology, basin_num)
+        q_node = extract_node_data_txt(self.file, "Time;", self.topology)
+
+        # Remove invalid nodes and replace 0's with NaN values
+        q_node.drop(invalid_nodes[basin_num], inplace=True) 
+        q_node.replace(0.0, np.NaN, inplace = True)
         
-        # Calculate SWORD of Science data: Qhat and Qsds
-        sword_data = _calculate_qhat_qsd(self.q_node)
+        # Calculate SWORD of Science data: Qhat and Qsd organized by reach
+        q_node = create_reach_dict(q_node, self.topology, basin_num)
+        sword_data = _calculate_qhat_qsd(q_node)
         self.qhat_reach = sword_data["qhat_reach"]
         self.qsd_reach = sword_data["qsd_reach"]
 
