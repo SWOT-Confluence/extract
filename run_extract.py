@@ -8,7 +8,7 @@ from time import time
 from mpi4py import MPI
 
 # Local imports
-from app.config import extract_config
+from app.data.config import extract_config
 from app.Extract import Extract
 
 '''Runs extract program using input and output directories specified

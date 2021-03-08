@@ -9,7 +9,7 @@ import pandas as pd
 from sklearn.linear_model import LinearRegression
 
 # Local imports
-from app.config import extract_config
+from app.data.config import extract_config
 
 class Slope:
     """Class that represents slope data.
