@@ -27,7 +27,7 @@ class Wse:
         # Add base elevation to node evelation - replacing all zero values with NaN
         base_data = _extract_base_data(self.file, self.topology)
         node_data = extract_node_data_txt(self.file, "Time;", self.topology)
-        node_data.replace(0, np.nan, inplace = True)
+        node_data[np.isclose(node_data.values, 0.0, atol=0.001)] = np.NaN
         df = node_data.add(base_data["elev"], axis = "index")
 
         # Replace invalid nodes with NaN

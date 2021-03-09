@@ -33,7 +33,7 @@ class Discharge:
 
         # Replace invalid nodes and 0's with NaN values
         q_node.loc[invalid_nodes[basin_num], :] = np.nan
-        q_node.replace(0.0, np.NaN, inplace = True)
+        q_node[np.isclose(q_node.values, 0.0, atol=0.0001)] = np.NaN
         
         # Calculate SWORD of Science data: Qhat and Qsd organized by reach
         q_node = create_reach_dict(q_node, self.topology, basin_num)
