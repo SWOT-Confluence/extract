@@ -28,9 +28,9 @@ class Width:
         self.file = file
         self.topology = topology
         
-        # Drop invalid nodes and organize dataframe by reach
+        # Replace invalid nodes with NaN and organize dataframe by reach
         df = extract_node_data_shp(file, self.topology)
-        df.drop(invalid_nodes[basin_num], inplace=True)
+        df.loc[invalid_nodes[basin_num], :] = np.nan
         df_dict = create_reach_dict(df, self.topology, basin_num)
 
         # Create node-level and reach-level dataframes for each reach

@@ -30,8 +30,8 @@ class Wse:
         node_data.replace(0, np.nan, inplace = True)
         df = node_data.add(base_data["elev"], axis = "index")
 
-        # Remove invalid nodes
-        df.drop(invalid_nodes[basin_num], inplace=True)
+        # Replace invalid nodes with NaN
+        df.loc[invalid_nodes[basin_num], :] = np.nan
 
         # Create node-level and reach-level dataframes for each reach
         self.wse_node = create_reach_dict(df, self.topology, basin_num)

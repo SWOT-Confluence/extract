@@ -31,8 +31,8 @@ class Discharge:
         self.topology = topology
         q_node = extract_node_data_txt(self.file, "Time;", self.topology)
 
-        # Remove invalid nodes and replace 0's with NaN values
-        q_node.drop(invalid_nodes[basin_num], inplace=True) 
+        # Replace invalid nodes and 0's with NaN values
+        q_node.loc[invalid_nodes[basin_num], :] = np.nan
         q_node.replace(0.0, np.NaN, inplace = True)
         
         # Calculate SWORD of Science data: Qhat and Qsd organized by reach

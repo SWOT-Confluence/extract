@@ -38,8 +38,7 @@ class Slope:
         self.wse_node = wse_node
 
         # Remove invalid nodes from topology and organize by reachid
-        topo_df = topology.topo_data.drop(invalid_nodes[basin_num])
-        coord_df = list(topo_df.groupby("reachid"))
+        coord_df = list(topology.topo_data.groupby("reachid"))
         self.coord_dict = { basin_num + '_' + element[0] : element[1] for element in coord_df }
 
         # Use coordinate data and wse data to calculate slope (reach and node)
