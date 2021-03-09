@@ -1,6 +1,9 @@
 # Standard imports
 import json
 
+# Local imports
+from app.data.config import extract_config
+
 class Input:
     """A class that represents input data files to be processed.
     
@@ -30,5 +33,5 @@ class Input:
             self.topology_file = self.input_directory / (self.basin_num + "_T.csv")
             self.width_file = self.input_directory / (self.basin_num + "_W.shp")
             self.wse_file = self.input_directory / (self.basin_num + ".stage")
-            with open("app/data/invalid_nodes.json") as invalid_node_file:
+            with open(extract_config["invalid_node_file"]) as invalid_node_file:
                 self.invalid_nodes = json.load(invalid_node_file)
