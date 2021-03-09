@@ -31,7 +31,8 @@ class Output:
     TIME_STEPS = 9862
     FILL_VALUE = -9999
 
-    def __init__(self, data, output_directory):
+    def __init__(self, data, output_directory, logger):
+        self.logger = logger
         self.data = data
         self.output_directory = output_directory
         
@@ -48,7 +49,7 @@ class Output:
         on the reach and node level."""
 
         for key, value in self.data["width"].width_node.items():
-            print("\tWRITING REACH:", key)
+            self.logger.info(f"WRITING REACH: {key}")
             number_nodes = value.shape[0]
             self._define_datasets(str(key))
             self._create_dim_coords(number_nodes)

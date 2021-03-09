@@ -43,43 +43,37 @@ class Extract:
                 input = Input(entry)
 
                 # Retrieve data from UK files
-                data_dict = self._create_data_dict(input)
+                data_dict = _create_data_dict(input)
 
                 # Write output
-                output = Output(data_dict, self.output_directory)
+                output = Output(data_dict, self.output_directory, self.logger)
                 output.write_output()
     
-    def _create_data_dict(self, input):
-        """Create a dictionary of node and reach level data from input files."""
+def _create_data_dict(input):
+    """Create a dictionary of node and reach level data from input files."""
 
-        # Topology
-        self.logger.info('Calculating topology...')
-        topology = Topology(input.topology_file)
+    # Topology
+    topology = Topology(input.topology_file)
 
-        # Discharge reach and node data (Qhat and Qsd)
-        self.logger.info('Calculating discharge...')
-        discharge = Discharge(input.discharge_file, topology, input.basin_num, input.invalid_nodes)
+    # Discharge reach and node data (Qhat and Qsd)
+    discharge = Discharge(input.discharge_file, topology, input.basin_num, input.invalid_nodes)
 
-        # width reach and node data
-        self.logger.info('Calculating width...')
-        width = Width(input.width_file, topology, input.basin_num, input.invalid_nodes)
+    # width reach and node data
+    width = Width(input.width_file, topology, input.basin_num, input.invalid_nodes)
 
-        # wse reach and node data
-        self.logger.info('Calculating wse...')
-        wse = Wse(input.wse_file, topology, input.basin_num, input.invalid_nodes)
+    # wse reach and node data
+    wse = Wse(input.wse_file, topology, input.basin_num, input.invalid_nodes)
 
-        # slope2 reach and node data
-        self.logger.info('Calculating slope2...')
-        slope = Slope(topology, wse.wse_node, input.basin_num, input.invalid_nodes)
+    # slope2 reach and node data
+    slope = Slope(topology, wse.wse_node, input.basin_num, input.invalid_nodes)
 
-        # d_x_area reach and node data
-        self.logger.info('Calculating d_x_area...')
-        dxarea = Dxarea(width, wse, topology)
+    # d_x_area reach and node data
+    dxarea = Dxarea(width, wse, topology)
 
-        return {
-            "discharge" : discharge,
-            "dxarea" : dxarea,
-            "slope" : slope,
-            "width" : width,
-            "wse" : wse
-        }
+    return {
+        "discharge" : discharge,
+        "dxarea" : dxarea,
+        "slope" : slope,
+        "width" : width,
+        "wse" : wse
+    }

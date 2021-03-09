@@ -20,33 +20,30 @@ def run(input_dir, output_dir):
     """Run extract using MPI where a range of basins is handled by each process."""
 
     rank = COMM.Get_rank()
+    rank_logger = create_rank_log(rank)
+    main_logger = create_main_logger()
 
     if rank == 0:
-        print("Extracting and calculating data for directory:", 
-            "\n\t", input_dir)
+        main_logger.info(f"Extracting and calculating data for directory: {input_dir}")
     
     # Create a dictionary of all ranks assigned to a range of basin directories
     dir_dict = {}
     if rank == 0:
-        dir_dict = get_dir_dict(input_dir)
+        dir_dict = get_dir_dict(input_dir, main_logger)
       
     # Send data dictionary to all processes to calculate SWOT and SWORD data
     dir_dict = COMM.bcast(dir_dict, root=0)
 
-    # Create a logger for each rank
-    rank_logger = create_rank_log(rank)
-    
     # Run extract on dir_dict passing input based on rank
-    print("Processing for rank number:", rank)
     extract = Extract(dir_dict[rank], output_dir, rank_logger)
     extract.extract_data()
 
     COMM.barrier()
     if rank == 0:
-        print("Processing complete. Reach files can be found in directory:", 
-            "\t\n", output_dir)
+        main_logger.info(f"Processing complete.")
+        main_logger.info(f"Reach files can be found in directory: {output_dir}")
 
-def get_dir_dict(input_dir):
+def get_dir_dict(input_dir, main_logger):
     """Creates a dictionary of rank keys with a directory list value."""
     
     dir_dict = {}
@@ -81,10 +78,32 @@ def get_dir_dict(input_dir):
         for element in value:
             basin_count += 1
         total_basins += basin_count
-        print(key, "\tbasin count", basin_count)
-    print("Total basins", total_basins, "\n")
+        main_logger.info(f"{key},    basin count: {basin_count}")
+    main_logger.info(f"Total basins {total_basins}")
 
     return dir_dict
+
+def create_main_logger():
+    """Creates a main file logger."""
+
+    # Create a Logger object and set log level
+    main_logger = logging.getLogger("main_logger")
+    main_logger.setLevel(logging.DEBUG)
+
+    # Create a handler to file and set level
+    filename = f"{extract_config['logging_dir']}/main.log"
+    file_handler = logging.FileHandler(filename)
+    file_handler.setLevel(logging.INFO)
+
+    # Create a formatter and add it to the handler
+    file_format = logging.Formatter("%(message)s")
+    file_handler.setFormatter(file_format)
+
+    # Add handlers to logger
+    main_logger.addHandler(file_handler)
+
+    # Return logger
+    return main_logger
 
 def create_rank_log(rank):
     """Creates a file logger for each rank to log to."""
@@ -99,8 +118,7 @@ def create_rank_log(rank):
     file_handler.setLevel(logging.INFO)
 
     # Create a formatter and add it to the handler
-    file_format = logging.Formatter("%(asctime)s - %(threadName)s - "
-        + "%(module)s - %(levelname)s : %(message)s")
+    file_format = logging.Formatter("%(message)s")
     file_handler.setFormatter(file_format)
 
     # Add handlers to logger
@@ -110,11 +128,7 @@ def create_rank_log(rank):
     return rank_logger
 
 if __name__ == "__main__":
-    start = time()
+
     input_dir = Path(extract_config["input_dir"])
     output_dir = Path(extract_config["output_dir"])
     run(input_dir, output_dir)
-    COMM.barrier()
-    end = time()
-    if (COMM.Get_rank() == 0):
-        print("Total processing time:", end - start)

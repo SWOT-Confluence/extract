@@ -11,3 +11,4 @@ tests/test_data
 
 # Logs
 logs
+logs/*
