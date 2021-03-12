@@ -43,17 +43,19 @@ class Extract:
                 input = Input(entry)
 
                 # Retrieve data from UK files
-                data_dict = _create_data_dict(input)
+                data_dict = _create_data_dict(input, entry.name)
 
                 # Write output
                 output = Output(data_dict, self.output_directory, self.logger)
                 output.write_output()
     
-def _create_data_dict(input):
+def _create_data_dict(input, basin_num):
     """Create a dictionary of node and reach level data from input files."""
 
     # Topology
     topology = Topology(input.topology_file)
+    topo_df = list(topology.topo_data.groupby("reachid"))
+    topo_dict = { basin_num + '_' + element[0] : element[1] for element in topo_df }
 
     # Discharge reach and node data (Qhat and Qsd)
     discharge = Discharge(input.discharge_file, topology, input.basin_num, input.invalid_nodes)
@@ -71,6 +73,7 @@ def _create_data_dict(input):
     dxarea = Dxarea(width, wse, topology)
 
     return {
+        "topology" : topo_dict,
         "discharge" : discharge,
         "dxarea" : dxarea,
         "slope" : slope,

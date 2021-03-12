@@ -48,7 +48,7 @@ class Output:
         """Writes output to two NetCDF files for SWOT and SoS of Science data
         on the reach and node level."""
 
-        for key, value in self.data["width"].width_node.items():
+        for key, value in self.data["topology"].items():
             self.logger.info(f"WRITING REACH: {key}")
             number_nodes = value.shape[0]
             self._define_datasets(str(key))
