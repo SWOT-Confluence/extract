@@ -23,6 +23,7 @@ class Width:
     """
 
     TIME_STEPS = 9862
+    TIME_STEPS_500 = 9362
 
     def __init__(self, file, topology, basin_num, invalid_nodes):
         self.file = file
@@ -46,10 +47,10 @@ def _create_node_dict(df_dict):
         value.drop(labels = ["x", "y", "index"], axis = 1, inplace = True)
         
         # Repeat width value along columns (time steps)
-        value_tile = np.tile(value.astype("float64").to_numpy(), (1, Width.TIME_STEPS))
+        value_tile = np.tile(value.astype("float64").to_numpy(), (1, Width.TIME_STEPS_500))
         
         # Create a dataframe with repeated width data
-        width_df = pd.DataFrame(value_tile, columns = np.arange(0, Width.TIME_STEPS))
+        width_df = pd.DataFrame(value_tile, columns = np.arange(500, Width.TIME_STEPS))
         
         # Insert node values as an index to the dataframe
         width_df.insert(0, "node", np.array(value.index))

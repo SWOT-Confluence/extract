@@ -30,6 +30,9 @@ class Wse:
         node_data[np.isclose(node_data.values, 0.0, atol=0.001)] = np.NaN
         df = node_data.add(base_data["elev"], axis = "index")
 
+        # Remove first 500 time steps
+        df = df.iloc[:, 500:9862]
+
         # Replace invalid nodes with NaN
         df.loc[invalid_nodes[basin_num], :] = np.nan
 

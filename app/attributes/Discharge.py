@@ -31,6 +31,9 @@ class Discharge:
         self.topology = topology
         q_node = extract_node_data_txt(self.file, "Time;", self.topology)
 
+        # Remove first 500 time steps
+        q_node = q_node.iloc[:, 500:9862]
+
         # Replace invalid nodes with NaN values
         q_node.loc[invalid_nodes[basin_num], :] = np.nan
         

@@ -33,6 +33,8 @@ class TestSlope(unittest.TestCase):
         "008" : []
     }
 
+    COLUMNS = np.arange(0,5)
+
     def test_calculate_distance(self):        
         # Retrieve row and start node data
         start_data = self.COORD_DATA.iloc[0]
@@ -109,19 +111,19 @@ class TestSlope(unittest.TestCase):
     @mock.patch.dict("app.data.config.extract_config", {"no_cores": 5, "input_dir": "", 
         "output_dir": "", "logging_dir": ""})
     @patch('app.attributes.Topology', autospec=True)
-    @patch.object(Slope, 'TIME_STEPS')
-    def test_create_node_dict(self, mock_time, mock_topo):
+    def test_create_node_dict(self, mock_topo):
         
-        # Data needed to create slope object
-        mock_time = 5
-
+        # Topo data
         topo_data = self.COORD_DATA.rename(columns = {"link" : "reachid"})
-        convert_dict = { "reachid" : str }
-        topo_data = topo_data.astype(convert_dict)
+        topo_data.astype({ "reachid" : str })
         mock_topo.topo_data = topo_data
 
+        # WSE data
         wse_node = {}
-        wse_node["008_1"] = self.WSE_DATA
+        np_nan = np.full((5, 9357), np.nan)
+        pd_nan = pd.DataFrame(np_nan)
+        wse_node["008_1"] = pd.concat([self.WSE_DATA, pd_nan], axis = 1)
+        wse_node["008_1"].columns = np.arange(500, 9862)
 
         # Expected node dictionary
         expected_dict = {}
@@ -133,6 +135,8 @@ class TestSlope(unittest.TestCase):
                         [0.01325, 0.01199, 0.01154, 0.01022, 0.00985],
                         ]
         expected_dict["008_1"] = pd.DataFrame(expected_value)
+        expected_dict["008_1"] = pd.concat([expected_dict["008_1"], pd_nan], axis = 1)
+        expected_dict["008_1"].columns = np.arange(500, 9862)
         expected_dict["008_1"].insert(0, "nodeid", self.COORD_DATA.index.to_numpy())
         expected_dict["008_1"].set_index("nodeid", inplace = True)
 

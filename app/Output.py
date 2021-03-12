@@ -28,7 +28,8 @@ class Output:
             netCDF4.Group object for node level data
     """
 
-    TIME_STEPS = 9862
+    #TIME_STEPS = 9862
+    TIME_STEPS = 9362
     FILL_VALUE = -9999
 
     def __init__(self, data, output_directory, logger):

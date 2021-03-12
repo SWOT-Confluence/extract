@@ -31,7 +31,8 @@ class TestWidth(unittest.TestCase):
         width_dict["008_1"] = width_df
 
         # Create expected data
-        node = pd.DataFrame(np.full((5, 9862), 30.0), dtype=float)
+        node = pd.DataFrame(np.full((5, 9362), 30.0), dtype=float)
+        node.columns = np.arange(500, 9862)
         node.insert(0, "node", range(5))
         node.set_index("node", inplace = True)
         expected_dict = {}

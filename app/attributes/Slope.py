@@ -71,6 +71,9 @@ class Slope:
             # Create a dataframe with repeated values
             node_df = pd.DataFrame(value_tile)
             
+            # Rename columns to match time steps for other data
+            node_df.columns = np.arange(500, Slope.TIME_STEPS)
+            
             # Insert node identifiers as an index to the dataframe
             node_df.insert(0, "nodeid", self.coord_dict[key].index.to_numpy())
             node_df.set_index("nodeid", inplace = True)
