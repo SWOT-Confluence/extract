@@ -53,7 +53,7 @@ class Output:
             self.logger.info(f"WRITING REACH: {key}")
             number_nodes = value.shape[0]
             self._define_datasets(str(key))
-            self._create_dim_coords(number_nodes)
+            self._create_dim_coords(number_nodes, len(str(key)))
             self._create_groups()
             self._create_swot_reach_vars(key)
             self._create_swot_node_vars(key)
@@ -76,7 +76,6 @@ class Output:
         swot_file = self.output_directory / (reach_id + "_SWOT.nc")
         self.swot_dataset = Dataset(swot_file, "w", format="NETCDF4")
         self.swot_dataset.title = f"SWOT data for reach ID: {reach_id}"
-        self.swot_dataset.reachid = reach_id
 
         # SoS
         sos_file = self.output_directory / (reach_id + "_SOS.nc")
@@ -84,10 +83,11 @@ class Output:
         self.sos_dataset.title = f"SoS of Science data for reach ID: {reach_id}"
         self.sos_dataset.reachid = reach_id
 
-    def _create_dim_coords(self, number_nodes):
+    def _create_dim_coords(self, number_nodes, key_length):
         """Create dimensions and coordinate variables for each dimension."""
 
         # SWOT
+        self.swot_dataset.createDimension("nchar", key_length)
         self.swot_dataset.createDimension("nt", self.TIME_STEPS)
         self.swot_dataset.createDimension("nx", number_nodes)
         create_coord_var(self.swot_dataset, number_nodes)
@@ -105,6 +105,13 @@ class Output:
 
     def _create_swot_reach_vars(self, key):
         """Create SWOT reach-level variables."""
+
+        # reachid
+        rid_v = self.swot_reach.createVariable("reach_id", "S1", ("nchar"))
+        rid_v.long_name = "reach ID from Euro benchmark data"
+        rid_v.comment = "Unique reach identifier from the Euro benchmark data." \
+            + " The format of the identifier is BBB_RRRR, where B=basin, R=reach."
+        rid_v[:] = (np.array(list(key), dtype="S4"))
 
         # d_x_area
         dxa_v = self.swot_reach.createVariable("d_x_area", "f8", ("nt"), fill_value = self.FILL_VALUE)
@@ -161,6 +168,13 @@ class Output:
 
     def _create_swot_node_vars(self, key):
         """Create SWOT node-level variables."""
+
+        # reachid
+        rid_v = self.swot_node.createVariable("reach_id", "S1", ("nchar"))
+        rid_v.long_name = "reach ID from Euro benchmark data"
+        rid_v.comment = "Unique reach identifier from the Euro benchmark data." \
+            + " The format of the identifier is BBB_RRRR, where B=basin, R=reach."
+        rid_v[:] = rid_v[:] = (np.array(list(key), dtype="S4"))
 
         # d_x_area
         dxa_v = self.swot_node.createVariable("d_x_area", "f8", ("nx", "nt"), fill_value = self.FILL_VALUE)
