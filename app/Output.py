@@ -81,7 +81,7 @@ class Output:
         sos_file = self.output_directory / (reach_id + "_SOS.nc")
         self.sos_dataset = Dataset(sos_file, "w", format="NETCDF4")
         self.sos_dataset.title = f"SoS of Science data for reach ID: {reach_id}"
-        self.sos_dataset.reachid = reach_id
+        self.sos_dataset.reach_id = reach_id
 
     def _create_dim_coords(self, number_nodes, key_length):
         """Create dimensions and coordinate variables for each dimension."""
